@@ -1,26 +1,29 @@
 package com.example.attendancesystem.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
+@Table(name = "users") // optional but recommended
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true)
     private String username;
 
-    // Path to stored user photo for recognition
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @Column(nullable = false)
+    private String password;
+
+    private boolean enabled = false;
+
+    // ✅ New field for storing photo location
     private String photoPath;
-
-    // Getters & setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
-
-    public String getPhotoPath() { return photoPath; }
-    public void setPhotoPath(String photoPath) { this.photoPath = photoPath; }
 }

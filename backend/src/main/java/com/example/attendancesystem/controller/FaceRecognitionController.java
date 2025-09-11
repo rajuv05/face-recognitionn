@@ -7,7 +7,6 @@ import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.global.opencv_objdetect;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Rect;
@@ -15,12 +14,12 @@ import org.bytedeco.opencv.opencv_core.RectVector;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 @RestController
@@ -45,18 +44,30 @@ public class FaceRecognitionController {
 
             // Load frame using JavaCPP OpenCV
             Mat image = opencv_imgcodecs.imread(filePath);
-            if (image.empty()) return ResponseEntity.badRequest().body("Invalid image file");
+            if (image.empty()) {
+                return ResponseEntity.badRequest().body("Invalid image file");
+            }
 
-            // Load Haar Cascade
-            String xmlPath = "src/main/resources/haarcascades/haarcascade_frontalface_default.xml";
-            CascadeClassifier faceDetector = new CascadeClassifier(xmlPath);
-            if (faceDetector.empty()) return ResponseEntity.status(500).body("Failed to load cascade classifier");
+            // ✅ Load Haar Cascade from resources safely
+            ClassPathResource resource =
+                    new ClassPathResource("haarcascades/haarcascade_frontalface_default.xml");
+
+            File tempFile = File.createTempFile("cascade", ".xml");
+            try (InputStream in = resource.getInputStream();
+                 OutputStream out = new FileOutputStream(tempFile)) {
+                in.transferTo(out);
+            }
+
+            CascadeClassifier faceDetector = new CascadeClassifier(tempFile.getAbsolutePath());
+            if (faceDetector.empty()) {
+                return ResponseEntity.status(500).body("Failed to load cascade classifier");
+            }
 
             // Detect faces
             RectVector faces = new RectVector();
             faceDetector.detectMultiScale(image, faces);
 
-            List<Map<String,Object>> results = new ArrayList<>();
+            List<Map<String, Object>> results = new ArrayList<>();
 
             for (long i = 0; i < faces.size(); i++) {
                 Rect rect = faces.get(i);
@@ -76,7 +87,8 @@ public class FaceRecognitionController {
                 for (User user : users) {
                     if (user.getPhotoPath() == null) continue;
 
-                    Mat knownImg = opencv_imgcodecs.imread(user.getPhotoPath(), opencv_imgcodecs.IMREAD_GRAYSCALE);
+                    Mat knownImg = opencv_imgcodecs.imread(user.getPhotoPath(),
+                            opencv_imgcodecs.IMREAD_GRAYSCALE);
                     if (knownImg.empty()) continue;
 
                     // Resize both images
@@ -91,18 +103,22 @@ public class FaceRecognitionController {
                     int[] histSize = {256};
                     float[] ranges = {0, 256};
 
-                    // Wrap arrays in JavaCPP pointers
                     IntPointer chPtr = new IntPointer(channels);
                     IntPointer histSizePtr = new IntPointer(histSize);
                     FloatPointer rangePtr = new FloatPointer(ranges);
 
-                    opencv_imgproc.calcHist(new MatVector(grayDetected), chPtr, new Mat(), hist1, histSizePtr, rangePtr, false);
-                    opencv_imgproc.calcHist(new MatVector(knownImg), chPtr, new Mat(), hist2, histSizePtr, rangePtr, false);
+                    opencv_imgproc.calcHist(new MatVector(grayDetected), chPtr,
+                            new Mat(), hist1, histSizePtr, rangePtr, false);
+                    opencv_imgproc.calcHist(new MatVector(knownImg), chPtr,
+                            new Mat(), hist2, histSizePtr, rangePtr, false);
 
-                    opencv_core.normalize(hist1, hist1, 0, 1, opencv_core.NORM_MINMAX, -1, null);
-                    opencv_core.normalize(hist2, hist2, 0, 1, opencv_core.NORM_MINMAX, -1, null);
+                    opencv_core.normalize(hist1, hist1, 0, 1,
+                            opencv_core.NORM_MINMAX, -1, null);
+                    opencv_core.normalize(hist2, hist2, 0, 1,
+                            opencv_core.NORM_MINMAX, -1, null);
 
-                    double similarity = opencv_imgproc.compareHist(hist1, hist2, opencv_imgproc.CV_COMP_CORREL);
+                    double similarity = opencv_imgproc.compareHist(hist1, hist2,
+                            opencv_imgproc.CV_COMP_CORREL);
 
                     if (similarity > 0.7) { // match threshold
                         recognizedUserId = user.getId();
@@ -112,7 +128,7 @@ public class FaceRecognitionController {
                 }
 
                 // Add face result
-                Map<String,Object> faceResult = new HashMap<>();
+                Map<String, Object> faceResult = new HashMap<>();
                 faceResult.put("x", rect.x());
                 faceResult.put("y", rect.y());
                 faceResult.put("width", rect.width());
@@ -125,7 +141,8 @@ public class FaceRecognitionController {
 
             return ResponseEntity.ok(results);
 
-        } catch (IOException e) {
+        } catch (Exception e) {
+            e.printStackTrace(); // ✅ log error to console
             return ResponseEntity.status(500).body("Error processing file: " + e.getMessage());
         }
     }

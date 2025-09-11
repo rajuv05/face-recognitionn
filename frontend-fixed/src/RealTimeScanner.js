@@ -1,115 +1,59 @@
-import React, { useRef, useCallback, useEffect, useState } from "react";
+import React, { useRef } from "react";
 import Webcam from "react-webcam";
 import axios from "axios";
 
-const RealTimeScanner = () => {
+export default function RealTimeScanner() {
   const webcamRef = useRef(null);
-  const canvasRef = useRef(null);
-  const [lastMarkedUser, setLastMarkedUser] = useState(null);
-  const [toast, setToast] = useState(null); // New: for showing notifications
 
-  const dataURLtoBlob = (dataURL) => {
+  // Convert Base64 → Blob
+  function dataURLtoBlob(dataURL) {
     const byteString = atob(dataURL.split(",")[1]);
+    const mimeString = dataURL.split(",")[0].split(":")[1].split(";")[0];
     const ab = new ArrayBuffer(byteString.length);
     const ia = new Uint8Array(ab);
-    for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
-    return new Blob([ab], { type: "image/jpeg" });
-  };
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+    return new Blob([ab], { type: mimeString });
+  }
 
-  const drawFaces = (faces) => {
-    const canvas = canvasRef.current;
-    const video = webcamRef.current?.video;
-    if (!video || video.readyState !== 4) return;
-
-    const ctx = canvas.getContext("2d");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = "lime";
-    ctx.font = "18px Arial";
-    ctx.fillStyle = "lime";
-
-    faces.forEach(({ x, y, width, height, recognizedUser }, i) => {
-      ctx.strokeRect(x, y, width, height);
-      ctx.fillText(recognizedUser || `Face ${i + 1}`, x, y - 5);
-    });
-  };
-
-  const capture = useCallback(async () => {
+  const captureAndSend = async () => {
     if (!webcamRef.current) return;
-
     const imageSrc = webcamRef.current.getScreenshot();
-    if (!imageSrc) return;
+    if (!imageSrc) {
+      console.error("Webcam did not capture image");
+      return;
+    }
 
+    // Convert to Blob & send as FormData
+    const blob = dataURLtoBlob(imageSrc);
     const formData = new FormData();
-    formData.append("file", dataURLtoBlob(imageSrc), "frame.jpg");
+    formData.append("file", blob, "frame.jpg");
 
     try {
       const res = await axios.post(
         "http://localhost:8080/api/face/recognize",
         formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
       );
-
-      const { userId, username, faceBox } = res.data;
-
-      // Mark attendance if recognized and not recently marked
-      if (userId && username !== "Unknown" && userId !== lastMarkedUser) {
-        await axios.post(`http://localhost:8080/api/attendance/mark?userId=${userId}`);
-        setLastMarkedUser(userId);
-        setToast(`${username} attendance marked ✅`); // Show toast
-        setTimeout(() => setLastMarkedUser(null), 10000);
-        setTimeout(() => setToast(null), 3000); // Hide toast after 3s
-      }
-
-      if (faceBox) {
-        drawFaces([{ ...faceBox, recognizedUser: username }]);
-      }
+      console.log("Recognition result:", res.data);
     } catch (err) {
       console.error("Error recognizing faces:", err);
     }
-  }, [lastMarkedUser]);
-
-  useEffect(() => {
-    const interval = setInterval(capture, 1500);
-    return () => clearInterval(interval);
-  }, [capture]);
+  };
 
   return (
-    <div style={{ position: "relative", display: "inline-block" }}>
+    <div>
       <Webcam
+        audio={false}
         ref={webcamRef}
         screenshotFormat="image/jpeg"
-        style={{ position: "absolute", top: 0, left: 0, zIndex: 1 }}
+        width={640}
+        height={480}
       />
-      <canvas
-        ref={canvasRef}
-        style={{ position: "absolute", top: 0, left: 0, zIndex: 2 }}
-      />
-
-      {/* Toast notification */}
-      {toast && (
-        <div
-          style={{
-            position: "absolute",
-            bottom: 20,
-            left: "50%",
-            transform: "translateX(-50%)",
-            backgroundColor: "rgba(0,128,0,0.8)",
-            color: "#fff",
-            padding: "10px 20px",
-            borderRadius: "8px",
-            zIndex: 3,
-            fontWeight: "bold",
-          }}
-        >
-          {toast}
-        </div>
-      )}
+      <button onClick={captureAndSend}>Scan Face</button>
     </div>
   );
-};
-
-export default RealTimeScanner;
+}
