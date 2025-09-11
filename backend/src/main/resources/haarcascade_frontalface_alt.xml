@@ -1,0 +1,6 @@
+<!--
+This is a placeholder file. For real face detection you MUST download the proper
+haarcascade_frontalface_alt.xml from OpenCV (https://github.com/opencv/opencv/tree/master/data/haarcascades)
+and place it here (src/main/resources) or in the working directory of the running app.
+-->
+<placeholder>haarcascade placeholder - download real XML from OpenCV and replace this file.</placeholder>

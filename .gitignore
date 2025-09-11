@@ -1,0 +1,25 @@
+
+# Ignore backend build
+/backend/target/
+
+# Ignore frontend build (if using React/Angular/etc.)
+/frontend-fixed/node_modules/
+/frontend-fixed/build/
+
+# Logs
+*.log
+logs/
+output.log
+
+# IDE
+.idea/
+.vscode/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Spring Boot configs
+/backend/application-*.yml
+/backend/application-*.yaml
+/backend/application-*.properties

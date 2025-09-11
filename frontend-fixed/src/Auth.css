@@ -1,0 +1,102 @@
+/* Dark background */
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: #0d0d0d;
+    color: white;
+}
+
+/* Center the form */
+.auth-container {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Card with red glow */
+.auth-card {
+    background: rgba(20, 20, 20, 0.95);
+    border-radius: 20px;
+    padding: 2.5rem;
+    width: 380px;
+    text-align: center;
+    animation: fadeSlideUp 1.2s ease forwards;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
+    border: 1px solid rgba(255, 0, 0, 0.3);
+}
+
+/* Entry animation */
+@keyframes fadeSlideUp {
+    0% { opacity: 0; transform: translateY(40px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Heading with red glow text */
+.auth-card h2 {
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #ff3333;
+    text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
+}
+
+/* Inputs */
+.auth-input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: none;
+    outline: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    background: #1a1a1a;
+    color: white;
+    transition: 0.3s ease;
+}
+
+.auth-input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.auth-input:focus {
+    background: #222;
+    box-shadow: 0 0 8px #ff0000;
+}
+
+/* Button with red gradient */
+.auth-button {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(90deg, #ff0000, #cc0000);
+    border: none;
+    outline: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s ease;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}
+
+.auth-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+}
+
+/* Links */
+.auth-link {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+.auth-link a {
+    color: #ff4d4d;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.auth-link a:hover {
+    text-decoration: underline;
+}
