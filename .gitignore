@@ -51,3 +51,10 @@ docker-compose.override.yml
 
 # Docker volumes and data
 /db_data/
+
+# Ignore training images
+backend/faces/training/
+
+# Ignore model files (auto-generated)
+backend/faces/trainer.yml
+backend/faces/labels.txt
