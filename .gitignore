@@ -1,25 +1,53 @@
-
-# Ignore backend build
+# ============================
+# Backend (Spring Boot)
+# ============================
 /backend/target/
+/backend/.mvn/
+/backend/mvnw
+/backend/mvnw.cmd
 
-# Ignore frontend build (if using React/Angular/etc.)
+# Ignore environment/config files
+/backend/application-*.yml
+/backend/application-*.yaml
+/backend/application-*.properties
+
+# ============================
+# Frontend (React)
+# ============================
 /frontend-fixed/node_modules/
 /frontend-fixed/build/
+/frontend-fixed/.env.local
+/frontend-fixed/.env.development.local
+/frontend-fixed/.env.test.local
+/frontend-fixed/.env.production.local
 
+# ============================
 # Logs
+# ============================
 *.log
 logs/
 output.log
 
-# IDE
+# ============================
+# IDE / Editors
+# ============================
 .idea/
 .vscode/
+*.iml
 
-# OS Files
+# ============================
+# OS generated files
+# ============================
 .DS_Store
 Thumbs.db
 
-# Spring Boot configs
-/backend/application-*.yml
-/backend/application-*.yaml
-/backend/application-*.properties
+# ============================
+# Docker
+# ============================
+# Local overrides and secrets
+docker-compose.override.yml
+.env
+.env.*.local
+
+# Docker volumes and data
+/db_data/
