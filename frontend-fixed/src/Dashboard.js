@@ -11,16 +11,20 @@ function Dashboard() {
         navigate("/");
     };
 
-    const handleMarkAttendance = () => {
-        navigate("/mark-attendance");
-    };
-
     const handleViewAttendance = () => {
         navigate("/attendance-list");
     };
 
-    const handleOpenScanner = () => {       // 👈 NEW
-        navigate("/scanner");               // 👈 navigate to scanner route
+    const handleOpenScanner = () => {
+        navigate("/scanner");
+    };
+
+    const handleAttendanceDashboard = () => {
+        navigate("/attendance-dashboard");
+    };
+
+    const handleAddSamples = () => {
+        navigate("/add-samples"); // 👈 new route for FaceSampleCollector
     };
 
     return (
@@ -29,17 +33,28 @@ function Dashboard() {
                 <h2>Welcome, {username}! 👋</h2>
                 <p>Face Recognition Attendance Dashboard</p>
 
-                <div style={{ marginTop: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
-                    <button className="auth-button" onClick={handleMarkAttendance}>
-                        📸 Mark Attendance
-                    </button>
-
+                <div
+                    style={{
+                        marginTop: "1.5rem",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "1rem",
+                    }}
+                >
                     <button className="auth-button" onClick={handleViewAttendance}>
                         📊 View Attendance
                     </button>
 
-                    <button className="auth-button" onClick={handleOpenScanner}>   {/* 👈 NEW button */}
+                    <button className="auth-button" onClick={handleAttendanceDashboard}>
+                        📅 Attendance Dashboard
+                    </button>
+
+                    <button className="auth-button" onClick={handleOpenScanner}>
                         🎥 Open Scanner
+                    </button>
+
+                    <button className="auth-button" onClick={handleAddSamples}>
+                        📸 Add Face Samples
                     </button>
 
                     <button className="auth-button" onClick={handleLogout}>

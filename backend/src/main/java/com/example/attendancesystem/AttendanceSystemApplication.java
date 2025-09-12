@@ -11,17 +11,4 @@ public class AttendanceSystemApplication {
     public static void main(String[] args) {
         SpringApplication.run(AttendanceSystemApplication.class, args);
     }
-
-    // CORS configuration for React frontend
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**") // Allow all API paths
-                        .allowedOrigins("http://localhost:3000") // React frontend
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
-            }
-        };
-    }
 }

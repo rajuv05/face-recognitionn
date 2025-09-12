@@ -1,83 +1,64 @@
 package com.example.attendancesystem.controller;
 
 import com.example.attendancesystem.model.Attendance;
-import com.example.attendancesystem.model.User;
 import com.example.attendancesystem.repository.AttendanceRepository;
-import com.example.attendancesystem.repository.UserRepository;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/attendance")
 public class AttendanceController {
 
     private final AttendanceRepository attendanceRepository;
-    private final UserRepository userRepository;
 
-    public AttendanceController(AttendanceRepository attendanceRepository, UserRepository userRepository) {
+    public AttendanceController(AttendanceRepository attendanceRepository) {
         this.attendanceRepository = attendanceRepository;
-        this.userRepository = userRepository;
     }
 
-    // ✅ Mark attendance
+    // ✅ Mark attendance manually (optional, mostly for testing)
     @PostMapping("/mark")
-    public ResponseEntity<String> markAttendance(@RequestParam Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        // Optional: check if already marked today
-        boolean alreadyMarked = attendanceRepository
-                .findByUserIdAndDate(userId, LocalDate.now())
-                .isPresent();
-        if (alreadyMarked) {
-            return ResponseEntity.badRequest().body("Attendance already marked for today");
-        }
-
-        Attendance a = new Attendance();
-        a.setUser(user);  // ✅ Now we directly set the User object
-        a.setDate(LocalDate.now());
-        a.setTime(LocalTime.now());
-        attendanceRepository.save(a);
-
-        return ResponseEntity.ok("Attendance marked");
+    public Attendance markAttendance(@RequestParam String name, @RequestParam String rollNo) {
+        Attendance attendance = new Attendance(
+                name,
+                rollNo,
+                LocalDate.now(),
+                LocalTime.now()
+        );
+        return attendanceRepository.save(attendance);
     }
 
-    // ✅ List all attendances
+    // ✅ Get today’s attendance for a student
+    @GetMapping("/today/{rollNo}")
+    public List<Attendance> getTodayAttendance(@PathVariable String rollNo) {
+        return attendanceRepository.findByRollNoAndDate(rollNo, LocalDate.now());
+    }
+
+    // ✅ Get ALL attendance records
     @GetMapping("/list")
-    public List<AttendanceDTO> listAll() {
-        return attendanceRepository.findAll().stream().map(att -> {
-            User user = att.getUser();
-            String username = (user != null) ? user.getUsername() : "Unknown";
-            Long userId = (user != null) ? user.getId() : null;
-            return new AttendanceDTO(att.getId(), userId, username, att.getDate(), att.getTime());
-        }).collect(Collectors.toList());
+    public List<Attendance> getAllAttendance() {
+        return attendanceRepository.findAll();
     }
 
-    // ✅ DTO
-    public static class AttendanceDTO {
-        private Long id;
-        private Long userId;
-        private String username;
-        private LocalDate date;
-        private LocalTime time;
+    // ✅ Get unique students (name + rollNo)
+    @GetMapping("/students")
+    public List<Map<String, String>> getStudents() {
+        return attendanceRepository.findAll()
+                .stream()
+                .map(a -> Map.of("name", a.getName(), "rollNo", a.getRollNo()))
+                .distinct()
+                .toList();
+    }
 
-        public AttendanceDTO(Long id, Long userId, String username, LocalDate date, LocalTime time) {
-            this.id = id;
-            this.userId = userId;
-            this.username = username;
-            this.date = date;
-            this.time = time;
-        }
-
-        public Long getId() { return id; }
-        public Long getUserId() { return userId; }
-        public String getUsername() { return username; }
-        public LocalDate getDate() { return date; }
-        public LocalTime getTime() { return time; }
+    // ✅ Get attendance for a student in a specific month & year
+    @GetMapping("/{rollNo}")
+    public List<Attendance> getMonthlyAttendance(
+            @PathVariable String rollNo,
+            @RequestParam int month,
+            @RequestParam int year) {
+        return attendanceRepository.findByRollNoAndMonth(rollNo, month, year);
     }
 }
