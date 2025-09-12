@@ -61,4 +61,18 @@ public class AttendanceController {
             @RequestParam int year) {
         return attendanceRepository.findByRollNoAndMonth(rollNo, month, year);
     }
+
+    // ✅ Clear attendance for a specific student
+    @DeleteMapping("/clear/{rollNo}")
+    public String clearStudentAttendance(@PathVariable String rollNo) {
+        attendanceRepository.deleteByRollNo(rollNo);
+        return "✅ Attendance cleared for student with rollNo: " + rollNo;
+    }
+
+    // ✅ Clear ALL students' attendance
+    @DeleteMapping("/clear-all")
+    public String clearAllAttendance() {
+        attendanceRepository.deleteAll();
+        return "✅ All students' attendance cleared!";
+    }
 }

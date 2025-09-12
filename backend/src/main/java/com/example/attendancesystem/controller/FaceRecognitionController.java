@@ -2,6 +2,7 @@ package com.example.attendancesystem.controller;
 
 import com.example.attendancesystem.model.Attendance;
 import com.example.attendancesystem.repository.AttendanceRepository;
+import com.example.attendancesystem.util.FaceTrainer;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,7 @@ import org.bytedeco.opencv.opencv_face.LBPHFaceRecognizer;
 import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier;
 
 import java.io.*;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -27,34 +28,61 @@ import java.util.*;
 @RequestMapping("/api/face")
 public class FaceRecognitionController {
 
-    private final LBPHFaceRecognizer recognizer;
+    private LBPHFaceRecognizer recognizer;
     private final Map<Integer, StudentInfo> labelsMap = new HashMap<>();
     private final AttendanceRepository attendanceRepository;
-    private final CascadeClassifier faceDetector;
+    private CascadeClassifier faceDetector;
 
-    // ✅ Lower distance = better (LBPH returns distance, not probability)
-    private static final double CONFIDENCE_THRESHOLD = 87.0;
+    private static final double CONFIDENCE_THRESHOLD = 50.0;
+
+    private final String modelPath;
+    private final String labelsPath;
+    private final String trainingPath;
+    private final String haarPath;
 
     public FaceRecognitionController(AttendanceRepository attendanceRepository) {
         this.attendanceRepository = attendanceRepository;
 
+        // ✅ Always resolve under backend/faces (not backend/backend/faces)
         String basePath = System.getProperty("user.dir");
-        String modelPath = Paths.get(basePath, "faces", "trainer.yml").toString();
-        String labelsPath = Paths.get(basePath, "faces", "labels.txt").toString();
-        String haarPath = Paths.get(basePath, "faces", "haarcascade_frontalface_default.xml").toString();
+        String facesPath = Paths.get(basePath, "faces").toString();
 
+        this.trainingPath = Paths.get(facesPath, "training").toString();
+        this.modelPath = Paths.get(facesPath, "trainer.yml").toString();
+        this.labelsPath = Paths.get(facesPath, "labels.txt").toString();
+        this.haarPath = Paths.get(facesPath, "haarcascade_frontalface_default.xml").toString();
+
+        // ✅ Ensure directories exist
+        new File(this.trainingPath).mkdirs();
+
+        // ✅ Initialize recognizer
         recognizer = LBPHFaceRecognizer.create();
-        recognizer.read(modelPath);
+        if (new File(modelPath).exists()) {
+            recognizer.read(modelPath);
+            loadLabels(labelsPath);
+        }
 
-        loadLabels(labelsPath);
-
+        // ✅ Load Haar Cascade
         faceDetector = new CascadeClassifier(haarPath);
         if (faceDetector.empty()) {
-            System.err.println("⚠ Failed to load Haar Cascade XML!");
+            System.err.println("❌ Haar Cascade not loaded at: " + haarPath);
+        } else {
+            System.out.println("✅ Haar Cascade loaded: " + haarPath);
         }
     }
 
-    // ✅ Load labels (id:name:rollNo)
+    private void reloadModel() {
+        try {
+            recognizer = LBPHFaceRecognizer.create();
+            recognizer.read(modelPath);
+            labelsMap.clear();
+            loadLabels(labelsPath);
+            System.out.println("✅ Model reloaded successfully");
+        } catch (Exception e) {
+            System.err.println("⚠ Could not reload model: " + e.getMessage());
+        }
+    }
+
     private void loadLabels(String labelsPath) {
         try (BufferedReader br = new BufferedReader(new FileReader(labelsPath))) {
             String line;
@@ -71,11 +99,11 @@ public class FaceRecognitionController {
         }
     }
 
+    // ✅ Save new face sample into backend/faces/training
     @PostMapping("/save-sample")
     public ResponseEntity<String> saveSample(@RequestParam("file") MultipartFile file) {
         try {
-            String basePath = System.getProperty("user.dir") + "/faces/training";
-            File dir = new File(basePath);
+            File dir = new File(trainingPath);
             if (!dir.exists()) dir.mkdirs();
 
             File dest = new File(dir, file.getOriginalFilename());
@@ -87,6 +115,20 @@ public class FaceRecognitionController {
         }
     }
 
+    // ✅ Train & reload
+    @PostMapping("/train")
+    public ResponseEntity<String> trainModel() {
+        try {
+            FaceTrainer.main(new String[] {});
+            reloadModel();
+            return ResponseEntity.ok("✅ Training completed and model reloaded");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("❌ Training failed: " + e.getMessage());
+        }
+    }
+
+    // ✅ Recognize faces
     @PostMapping("/recognize")
     public ResponseEntity<Map<String, Object>> recognizeFace(@RequestParam("file") MultipartFile file) {
         Map<String, Object> response = new HashMap<>();
@@ -114,7 +156,6 @@ public class FaceRecognitionController {
                 Rect rect = facesDetected.get(i);
                 Mat faceROI = new Mat(imageGray, rect);
 
-                // ✅ Resize to match training
                 opencv_imgproc.resize(faceROI, faceROI, new org.bytedeco.opencv.opencv_core.Size(200, 200));
 
                 int[] predictedLabel = new int[1];
@@ -130,7 +171,7 @@ public class FaceRecognitionController {
                 }
 
                 if (matchedInfo != null) {
-                    if (distance <= CONFIDENCE_THRESHOLD) {  // ✅ accept only if distance ≤ 85
+                    if (distance <= CONFIDENCE_THRESHOLD) {
                         markAttendance(matchedInfo, distance, msg);
                         identity = matchedInfo.getName();
                     } else {
@@ -142,7 +183,6 @@ public class FaceRecognitionController {
                     msg.append("❌ Face not recognized\n");
                 }
 
-                // Build face response
                 Map<String, Object> faceData = new HashMap<>();
                 faceData.put("x", rect.x());
                 faceData.put("y", rect.y());
@@ -166,14 +206,12 @@ public class FaceRecognitionController {
         }
     }
 
-    // Convert upload → grayscale Mat
     private Mat getGrayImage(MultipartFile file) throws IOException {
         byte[] bytes = file.getBytes();
         Mat raw = new Mat(1, bytes.length, opencv_core.CV_8U, new BytePointer(bytes));
         return opencv_imgcodecs.imdecode(raw, opencv_imgcodecs.IMREAD_GRAYSCALE);
     }
 
-    // Mark attendance once per day
     private void markAttendance(StudentInfo info, double distance, StringBuilder msg) {
         LocalDate today = LocalDate.now();
         LocalDateTime now = LocalDateTime.now();
@@ -195,7 +233,6 @@ public class FaceRecognitionController {
         }
     }
 
-    // Simple holder
     static class StudentInfo {
         private final String name;
         private final String rollNo;

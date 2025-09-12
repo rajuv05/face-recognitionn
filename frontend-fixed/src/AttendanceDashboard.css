@@ -1,216 +1,59 @@
-/* Layout */
-.dashboard-container {
-  min-height: 100vh;
-  background: #121212;
-  color: #f1faee;
-  font-family: "Segoe UI", sans-serif;
-  padding: 20px;
-}
-
-.dashboard-title {
-  text-align: center;
-  font-size: 28px;
-  color: #e63946;
-  margin-bottom: 20px;
-  font-weight: 600;
-}
-
-/* Grid Layout */
-.dashboard-layout {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-/* Sidebar */
+/* Dark sidebar */
 .sidebar {
-  flex: 1;
-  min-width: 250px;
-  max-width: 300px;
-  background: #1e1e1e;
-  border-radius: 12px;
-  padding: 20px;
+  background: #15171c;
+  padding: 1.2rem;
+  border-radius: 10px;
+  height: 100%;
+  min-width: 260px;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
 }
 
+/* Search input */
 .search-input {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #333;
+  padding: 10px 12px;
   border-radius: 8px;
-  background: #2c2c2c;
-  color: #f1faee;
-  margin-bottom: 15px;
+  border: none;
+  outline: none;
+  margin-bottom: 1rem;
+  background: #1f2127;
+  color: #fff;
 }
 
-.student-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+/* Buttons */
+.btn {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: 0.3s ease;
 }
 
+.clear-all-btn {
+  background: #e63946;
+  color: white;
+}
+.clear-all-btn:hover {
+  background: #c92d3f;
+}
+
+/* Student list dark theme */
 .student-item {
   padding: 10px;
-  border-radius: 8px;
-  margin-bottom: 8px;
+  margin: 6px 0;
+  border-radius: 6px;
+  background: #1f2127;
   cursor: pointer;
-  background: #2c2c2c;
-  display: flex;
-  justify-content: space-between;
-  transition: 0.2s;
+  transition: 0.2s ease;
+  color: #fff;
 }
-
 .student-item:hover {
-  background: #333;
+  background: #2a2d34;
 }
-
 .student-item.active {
-  background: rgba(230, 57, 70, 0.2); /* muted red highlight */
-}
-
-.student-name {
-  font-weight: 500;
-}
-
-.student-roll {
-  color: #aaa;
-  font-size: 14px;
-}
-
-/* Main Content */
-.main-content {
-  flex: 3;
-  min-width: 400px;
-  background: #1e1e1e;
-  border-radius: 12px;
-  padding: 20px;
-}
-
-.student-heading {
-  font-size: 20px;
-  margin-bottom: 15px;
-  color: #e63946;
-}
-
-/* Stats */
-.stats-cards {
-  display: flex;
-  gap: 15px;
-  flex-wrap: wrap;
-  margin-bottom: 20px;
-}
-
-.stat-card {
-  flex: 1;
-  min-width: 120px;
-  background: #2c2c2c;
-  border-radius: 12px;
-  padding: 15px;
-  text-align: center;
-  font-weight: bold;
-  transition: 0.2s;
-}
-
-.stat-card h3 {
-  margin: 0;
-  font-size: 22px;
-  color: #f1faee;
-}
-
-.stat-card p {
-  margin: 5px 0 0;
-  font-size: 14px;
-  color: #ccc;
-}
-
-.stat-card.present {
-  border: 2px solid #2a9d8f;
-  color: #2a9d8f;
-}
-.stat-card.absent {
-  border: 2px solid #e63946;
-  color: #e63946;
-}
-.stat-card.percentage {
-  border: 2px solid #f4a261;
-  color: #f4a261;
-}
-
-/* Calendar */
-.custom-calendar {
-  background: #1e1e1e !important;
-  border: none !important;
-  border-radius: 12px;
-  padding: 10px;
-  color: #f1faee;
-}
-
-/* Navigation buttons */
-.react-calendar__navigation button {
-  color: #e63946 !important;
-  font-weight: 600;
-  font-size: 16px;
-}
-
-/* Weekdays */
-.react-calendar__month-view__weekdays {
-  text-align: center;
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: #ccc;
-}
-
-/* Force equal grid */
-.react-calendar__month-view__days {
-  display: grid !important;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-}
-
-/* Circular tiles */
-.react-calendar__tile {
-  border-radius: 50% !important; /* Circle */
-  width: 40px !important;
-  height: 40px !important;
-  line-height: 40px !important;
-  text-align: center;
-  margin: auto;
-  border: none !important;
-  transition: 0.2s;
-  color: #f1faee;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.react-calendar__tile:hover {
-  background: #333 !important;
-  transform: scale(1.05);
-}
-
-/* Attendance states */
-.present {
-  background: #2a9d8f !important;
-  color: #fff !important;
-}
-.absent {
-  background: #e63946 !important;
-  color: #fff !important;
-}
-.holiday {
-  background: #457b9d !important;
-  color: #fff !important;
-}
-.future {
-  background: #2c2c2c !important;
-  color: #777 !important;
-}
-
-/* Placeholder */
-.placeholder {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 200px;
-  font-size: 18px;
-  color: #777;
+  background: linear-gradient(90deg, #6a11cb, #2575fc);
+  color: white;
 }

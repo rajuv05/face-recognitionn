@@ -1,0 +1,141 @@
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(to bottom, #0a0f1c, #0d1117, #0d0d0d);
+  color: white;
+}
+
+/* Container */
+.collector-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+/* Card */
+.collector-card {
+  background: rgba(20, 20, 30, 0.9);
+  border-radius: 20px;
+  padding: 2.5rem;
+  width: 520px;
+  text-align: center;
+  box-shadow: 0 0 25px rgba(0, 123, 255, 0.4);
+  border: 1px solid rgba(0, 123, 255, 0.3);
+  animation: fadeSlideUp 0.8s ease forwards;
+}
+
+@keyframes fadeSlideUp {
+  0% { opacity: 0; transform: translateY(40px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Title */
+.collector-card h2 {
+  margin-bottom: 0.5rem;
+  color: #1e90ff;
+  font-size: 1.8rem;
+  text-shadow: 0 0 15px rgba(30, 144, 255, 0.8);
+}
+
+.subtitle {
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  color: #aaa;
+}
+
+/* Inputs */
+.input-row {
+  display: flex;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.input-row input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: #101520;
+  color: white;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.input-row input:focus {
+  outline: none;
+  background: #1a1f2e;
+  box-shadow: 0 0 8px #1e90ff;
+}
+
+/* Webcam */
+.webcam-wrapper {
+  margin: 1rem 0;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid rgba(30, 144, 255, 0.5);
+  box-shadow: 0 0 15px rgba(30, 144, 255, 0.4);
+}
+
+/* Buttons */
+.button-row {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+.button-row button {
+  flex: 1;
+  padding: 12px;
+  background: linear-gradient(90deg, #1e90ff, #0066cc);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(30, 144, 255, 0.5);
+  transition: 0.2s ease;
+}
+
+.button-row button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px rgba(30, 144, 255, 0.8);
+}
+
+.button-row button:disabled {
+  background: #333;
+  color: #777;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* Preview samples */
+.preview-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 1rem;
+  justify-content: center;
+}
+
+.preview-item {
+  text-align: center;
+}
+
+.preview-item img {
+  width: 100px;
+  height: 100px;
+  border-radius: 8px;
+  border: 1px solid #444;
+  object-fit: cover;
+}
+
+.preview-item span {
+  display: block;
+  font-size: 12px;
+  margin-top: 4px;
+  color: #bbb;
+}

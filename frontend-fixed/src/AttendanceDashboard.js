@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import "./AttendanceDashboard.css"; // ✅ styles
+import "./AttendanceDashboard.css";
 
 const AttendanceDashboard = () => {
   const [students, setStudents] = useState([]);
@@ -12,14 +12,20 @@ const AttendanceDashboard = () => {
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
 
-  useEffect(() => {
+  // 🔹 Fetch all students
+  const fetchStudents = () => {
     axios
       .get("http://localhost:8080/api/attendance/students")
       .then((res) => setStudents(res.data))
       .catch((err) => console.error(err));
-  }, []);
+  };
 
   useEffect(() => {
+    fetchStudents();
+  }, []);
+
+  // 🔹 Fetch attendance of selected student
+  const fetchAttendance = () => {
     if (selectedStudent) {
       axios
         .get(
@@ -28,12 +34,44 @@ const AttendanceDashboard = () => {
         .then((res) => setAttendance(res.data))
         .catch((err) => console.error(err));
     }
+  };
+
+  useEffect(() => {
+    fetchAttendance();
   }, [selectedStudent, month, year]);
 
+  // 🔹 Clear attendance of single student
+  const clearAttendance = async (rollNo) => {
+    if (!window.confirm("Are you sure you want to clear this student's attendance?")) return;
+    try {
+      await axios.delete(`http://localhost:8080/api/attendance/clear/${rollNo}`);
+      alert("✅ Attendance cleared for student " + rollNo);
+      if (selectedStudent?.rollNo === rollNo) setAttendance([]);
+      fetchStudents();
+    } catch (err) {
+      console.error(err);
+      alert("❌ Failed to clear attendance.");
+    }
+  };
+
+  // 🔹 Clear attendance for all students
+  const clearAllAttendance = async () => {
+    if (!window.confirm("⚠️ Are you sure you want to clear ALL students' attendance?")) return;
+    try {
+      await axios.delete("http://localhost:8080/api/attendance/clear-all");
+      alert("✅ Cleared attendance for all students");
+      setAttendance([]);
+      setSelectedStudent(null);
+      fetchStudents();
+    } catch (err) {
+      console.error(err);
+      alert("❌ Failed to clear all attendance.");
+    }
+  };
+
+  // ✅ Attendance calculations
   const today = new Date();
-  const presentDays = new Set(
-    attendance.map((a) => new Date(a.date).getDate())
-  ).size;
+  const presentDays = new Set(attendance.map((a) => new Date(a.date).getDate())).size;
 
   const daysInMonth = new Date(year, month, 0).getDate();
   let totalWorkingDays = 0;
@@ -52,13 +90,10 @@ const AttendanceDashboard = () => {
 
   const absentDays = totalWorkingDays - presentDays;
   const percentage =
-    totalWorkingDays > 0
-      ? ((presentDays / totalWorkingDays) * 100).toFixed(1)
-      : 0;
+    totalWorkingDays > 0 ? ((presentDays / totalWorkingDays) * 100).toFixed(1) : 0;
 
   const tileClassName = ({ date, view }) => {
     if (view === "month") {
-      const day = date.getDate();
       const isFuture = date > today;
       const isWeekend = date.getDay() === 0 || date.getDay() === 6;
       const present = attendance.some(
@@ -68,15 +103,15 @@ const AttendanceDashboard = () => {
       if (isFuture) return "future";
       if (isWeekend) return "holiday";
       if (present) return "present";
-      if (date.getMonth() + 1 === month && date.getFullYear() === year)
-        return "absent";
+      if (date.getMonth() + 1 === month && date.getFullYear() === year) return "absent";
     }
     return "";
   };
 
   return (
     <div className="dashboard-container">
-      <h2 className="dashboard-title">📅 Attendance Dashboard</h2>
+      {/* Title */}
+      <h2 className="dashboard-title gradient-text">📅 Attendance Dashboard</h2>
 
       <div className="dashboard-layout">
         {/* Sidebar */}
@@ -88,6 +123,11 @@ const AttendanceDashboard = () => {
             onChange={(e) => setSearch(e.target.value)}
             className="search-input"
           />
+
+          <button className="btn clear-all-btn" onClick={clearAllAttendance}>
+            🗑️ Clear All Attendance
+          </button>
+
           <ul className="student-list">
             {students
               .filter(
@@ -114,7 +154,7 @@ const AttendanceDashboard = () => {
         <div className="main-content">
           {selectedStudent ? (
             <>
-              <h3 className="student-heading">
+              <h3 className="student-heading gradient-text">
                 {selectedStudent.name} – {month}/{year}
               </h3>
 
@@ -140,15 +180,25 @@ const AttendanceDashboard = () => {
                 </div>
 
                 {/* Calendar */}
-                <Calendar
-                  value={new Date(year, month - 1)}
-                  onActiveStartDateChange={({ activeStartDate }) => {
-                    setMonth(activeStartDate.getMonth() + 1);
-                    setYear(activeStartDate.getFullYear());
-                  }}
-                  tileClassName={tileClassName}
-                  className="custom-calendar"
-                />
+                <div className="calendar-container">
+                  <Calendar
+                    value={new Date(year, month - 1)}
+                    onActiveStartDateChange={({ activeStartDate }) => {
+                      setMonth(activeStartDate.getMonth() + 1);
+                      setYear(activeStartDate.getFullYear());
+                    }}
+                    tileClassName={tileClassName}
+                    className="custom-calendar"
+                  />
+
+                  {/* Clear attendance button under calendar */}
+                  <button
+                    className="btn clear-btn"
+                    onClick={() => clearAttendance(selectedStudent.rollNo)}
+                  >
+                    🗑️ Clear {selectedStudent.name}'s Attendance
+                  </button>
+                </div>
               </div>
             </>
           ) : (

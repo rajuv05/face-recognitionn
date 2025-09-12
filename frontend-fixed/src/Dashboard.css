@@ -1,0 +1,97 @@
+/* Fullscreen background with gradient */
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(to bottom, #0a0f1c, #0d1117, #0d0d0d);
+  background-attachment: fixed;
+  color: #fff;
+}
+
+/* Center the content */
+.dashboard-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Card with soft glow */
+.dashboard-card {
+  background: rgba(20, 24, 34, 0.95);
+  border-radius: 18px;
+  padding: 2.5rem;
+  width: 440px;
+  text-align: center;
+  box-shadow: 0 0 20px rgba(37, 99, 235, 0.25); /* Soft blue glow */
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  animation: fadeSlideUp 0.8s ease forwards;
+}
+
+@keyframes fadeSlideUp {
+  0% { opacity: 0; transform: translateY(40px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Heading */
+.dashboard-card h2 {
+  margin-bottom: 0.5rem;
+  font-size: 1.9rem;
+  font-weight: 600;
+  color: #ffffff;
+  text-shadow: 0 0 8px rgba(59, 130, 246, 0.6); /* Glow */
+}
+
+.dashboard-card h2 span {
+  color: #3b82f6; /* Blue accent */
+  text-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+}
+
+/* Subtitle */
+.subtitle {
+  margin-bottom: 2rem;
+  font-size: 1rem;
+  color: #9aa0a6;
+  letter-spacing: 0.5px;
+}
+
+/* Buttons grid */
+.button-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Buttons with glow */
+.button-grid button {
+  padding: 14px;
+  width: 100%;
+  background: linear-gradient(90deg, #2563eb, #1e40af);
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 12px rgba(37, 99, 235, 0.3); /* Glow */
+}
+
+.button-grid button:hover {
+  background: linear-gradient(90deg, #1d4ed8, #1e3a8a);
+  box-shadow: 0 0 20px rgba(37, 99, 235, 0.6);
+  transform: translateY(-2px);
+}
+
+/* Logout button */
+.button-grid .logout {
+  background: transparent;
+  color: #ef4444;
+  border: 1px solid #ef4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+}
+
+.button-grid .logout:hover {
+  background: #111827;
+  color: #f87171;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+}

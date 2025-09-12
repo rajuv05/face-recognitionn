@@ -1,14 +1,15 @@
 import React, { useRef, useState, useEffect } from "react";
 import Webcam from "react-webcam";
 import axios from "axios";
+import "./RealTimeScanner.css";
 
 export default function RealTimeScanner() {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
   const [message, setMessage] = useState("Waiting for scan...");
   const [faces, setFaces] = useState([]);
+  const [glowType, setGlowType] = useState(""); // "", "success", "fail"
 
-  // Convert base64 → Blob
   function dataURLtoBlob(dataURL) {
     const byteString = atob(dataURL.split(",")[1]);
     const mimeString = dataURL.split(",")[0].split(":")[1].split(";")[0];
@@ -20,14 +21,10 @@ export default function RealTimeScanner() {
     return new Blob([ab], { type: mimeString });
   }
 
-  // Capture frame & send to backend
   const captureAndSend = async () => {
     if (!webcamRef.current) return;
     const imageSrc = webcamRef.current.getScreenshot();
-    if (!imageSrc) {
-      console.log("⚠️ No image captured from webcam");
-      return;
-    }
+    if (!imageSrc) return;
 
     const blob = dataURLtoBlob(imageSrc);
     const formData = new FormData();
@@ -40,17 +37,32 @@ export default function RealTimeScanner() {
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
-      console.log("📥 Backend response:", res.data);
-
-      setMessage(res.data.message || "❌ No response");
+      const msg = res.data.message || "❌ No response";
+      setMessage(msg);
       setFaces(res.data.faces || []);
+
+      // ✅ Success case
+      if (msg.toLowerCase().includes("marked") || msg.includes("✅")) {
+        setGlowType("success");
+        setTimeout(() => setGlowType(""), 2000);
+      }
+      // ❌ Failure case
+      else if (
+        msg.toLowerCase().includes("no recog") ||
+        msg.toLowerCase().includes("unknown") ||
+        msg.includes("❌")
+      ) {
+        setGlowType("fail");
+        setTimeout(() => setGlowType(""), 2000);
+      }
     } catch (err) {
       console.error("🚨 Error calling backend:", err);
       setMessage("⚠️ Error connecting to backend");
+      setGlowType("fail");
+      setTimeout(() => setGlowType(""), 2000);
     }
   };
 
-  // 🔄 Auto scan every 3 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       captureAndSend();
@@ -58,7 +70,6 @@ export default function RealTimeScanner() {
     return () => clearInterval(interval);
   }, []);
 
-  // 🎨 Draw bounding boxes
   useEffect(() => {
     const canvas = canvasRef.current;
     const context = canvas?.getContext("2d");
@@ -73,9 +84,8 @@ export default function RealTimeScanner() {
       context.rect(face.x, face.y, face.width, face.height);
       context.stroke();
 
-      // Main label
       context.fillStyle = "yellow";
-      context.font = "16px Arial";
+      context.font = "16px Poppins, sans-serif";
       const label =
         face.identity && face.identity !== "Unknown"
           ? `${face.identity} (${face.confidence?.toFixed?.(1) ?? "?"})`
@@ -85,66 +95,56 @@ export default function RealTimeScanner() {
   }, [faces]);
 
   return (
-    <div style={{ position: "relative", display: "inline-block" }}>
-      {/* Webcam */}
-      <Webcam
-        audio={false}
-        ref={webcamRef}
-        screenshotFormat="image/jpeg"
-        width={640}
-        height={480}
-        videoConstraints={{ facingMode: "user" }}
-        style={{ borderRadius: "8px" }}
-      />
+    <div className="scanner-container">
+      <div className="scanner-card">
+        <h2>👁️ Real-Time Face Scanner</h2>
+        <p className="subtitle">Scan faces and recognize students instantly</p>
 
-      {/* Canvas Overlay */}
-      <canvas
-        ref={canvasRef}
-        width={640}
-        height={480}
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          borderRadius: "8px",
-        }}
-      />
+        {/* ✅ Always visible message */}
+        <p className="scan-message">{message}</p>
 
-      {/* Backend message */}
-      <p style={{ textAlign: "center", marginTop: "10px", fontWeight: "bold" }}>
-        {message}
-      </p>
+        <div
+          className={`webcam-wrapper ${
+            glowType === "success"
+              ? "success-glow"
+              : glowType === "fail"
+              ? "fail-glow"
+              : ""
+          }`}
+        >
+          <Webcam
+            audio={false}
+            ref={webcamRef}
+            screenshotFormat="image/jpeg"
+            width={640}
+            height={480}
+            videoConstraints={{ facingMode: "user" }}
+          />
+          <canvas ref={canvasRef} width={640} height={480} className="overlay" />
+        </div>
 
-      {/* 🔎 Show alternative matches */}
-      <div style={{ marginTop: "15px", textAlign: "center" }}>
-        {faces.map((face, idx) => (
-          <div
-            key={idx}
-            style={{
-              margin: "10px auto",
-              padding: "8px",
-              border: "1px solid #ccc",
-              borderRadius: "6px",
-              width: "60%",
-              background: "#f9f9f9",
-            }}
-          >
-            <strong>
-              Face #{idx + 1}: {face.identity}{" "}
-              {face.confidence && `(${face.confidence.toFixed(1)})`}
-            </strong>
-            {face.alternatives && face.alternatives.length > 0 && (
-              <ul style={{ marginTop: "5px", listStyle: "none", padding: 0 }}>
-                {face.alternatives.map((alt, i) => (
-                  <li key={i}>
-                    {i + 1}. {alt.name} (Roll: {alt.rollNo}, conf:{" "}
-                    {alt.confidence.toFixed(1)})
-                  </li>
-                ))}
-              </ul>
-            )}
+        {faces.length > 0 && (
+          <div className="faces-list">
+            {faces.map((face, idx) => (
+              <div key={idx} className="face-card">
+                <strong>
+                  Face #{idx + 1}: {face.identity}{" "}
+                  {face.confidence && `(${face.confidence.toFixed(1)})`}
+                </strong>
+                {face.alternatives && face.alternatives.length > 0 && (
+                  <ul>
+                    {face.alternatives.map((alt, i) => (
+                      <li key={i}>
+                        {i + 1}. {alt.name} (Roll: {alt.rollNo}, conf:{" "}
+                        {alt.confidence.toFixed(1)})
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ))}
           </div>
-        ))}
+        )}
       </div>
     </div>
   );

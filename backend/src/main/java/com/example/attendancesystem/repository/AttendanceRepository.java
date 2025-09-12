@@ -12,10 +12,14 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 
     List<Attendance> findByRollNoAndDate(String rollNo, LocalDate date);
 
-    // ✅ Custom query for month/year
+    // ✅ Safer: use FUNCTION for month/year extraction
     @Query("SELECT a FROM Attendance a WHERE a.rollNo = :rollNo " +
-            "AND MONTH(a.date) = :month AND YEAR(a.date) = :year")
+            "AND FUNCTION('MONTH', a.date) = :month " +
+            "AND FUNCTION('YEAR', a.date) = :year")
     List<Attendance> findByRollNoAndMonth(@Param("rollNo") String rollNo,
                                           @Param("month") int month,
                                           @Param("year") int year);
+
+    // ✅ Clear attendance by roll number
+    void deleteByRollNo(String rollNo);
 }

@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import "./AttendanceList.css";
 
 const AttendanceList = () => {
   const [records, setRecords] = useState([]);
 
   useEffect(() => {
     axios
-      .get("http://localhost:8080/api/attendance/all") // ✅ Correct endpoint
+      .get("http://localhost:8080/api/attendance/list") // ✅ fixed endpoint
       .then((res) => setRecords(res.data))
-      .catch((err) => console.error("Error fetching attendance:", err));
+      .catch((err) => console.error("❌ Error fetching attendance:", err));
   }, []);
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2 style={{ color: "white" }}>📋 Attendance Records</h2>
-      <table border="1" cellPadding="10" style={{ color: "white", width: "100%", borderCollapse: "collapse" }}>
+    <div className="attendance-container">
+      <h2 className="attendance-title gradient-text">📋 Attendance Records</h2>
+
+      <table className="attendance-table">
         <thead>
           <tr>
             <th>ID</th>
@@ -26,18 +28,18 @@ const AttendanceList = () => {
         </thead>
         <tbody>
           {records.length > 0 ? (
-            records.map((rec) => (
-              <tr key={rec.id}>
-                <td>{rec.id}</td>
-                <td>{rec.name}</td>
-                <td>{rec.rollNo}</td>
-                <td>{rec.date}</td>
-                <td>{rec.time}</td>
+            records.map((r) => (
+              <tr key={r.id}>
+                <td>{r.id}</td>
+                <td>{r.name}</td>
+                <td>{r.rollNo}</td>
+                <td>{r.date}</td>
+                <td>{r.time}</td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan="5" style={{ textAlign: "center" }}>
+              <td colSpan="5" className="no-records">
                 No records found
               </td>
             </tr>

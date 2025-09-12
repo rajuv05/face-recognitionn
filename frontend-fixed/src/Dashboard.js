@@ -1,69 +1,46 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import "./Auth.css"; // Reuse styles or create Dashboard.css
+import "./Dashboard.css"; // new file (separate from Auth.css)
 
 function Dashboard() {
-    const navigate = useNavigate();
-    const username = localStorage.getItem("username") || "User"; // Get from localStorage (set after login)
+  const navigate = useNavigate();
+  const username = localStorage.getItem("username") || "User";
 
-    const handleLogout = () => {
-        localStorage.clear();
-        navigate("/");
-    };
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/");
+  };
 
-    const handleViewAttendance = () => {
-        navigate("/attendance-list");
-    };
+  return (
+    <div className="dashboard-container">
+      <div className="dashboard-card">
+        <h2>👋 Welcome, {username}!</h2>
+        <p className="subtitle">Face Recognition Attendance System</p>
 
-    const handleOpenScanner = () => {
-        navigate("/scanner");
-    };
+        <div className="button-grid">
+          <button onClick={() => navigate("/attendance-list")}>
+            📊 View Attendance
+          </button>
 
-    const handleAttendanceDashboard = () => {
-        navigate("/attendance-dashboard");
-    };
+          <button onClick={() => navigate("/attendance-dashboard")}>
+            📅 Attendance Dashboard
+          </button>
 
-    const handleAddSamples = () => {
-        navigate("/add-samples"); // 👈 new route for FaceSampleCollector
-    };
+          <button onClick={() => navigate("/scanner")}>
+            🎥 Open Scanner
+          </button>
 
-    return (
-        <div className="auth-container">
-            <div className="auth-card">
-                <h2>Welcome, {username}! 👋</h2>
-                <p>Face Recognition Attendance Dashboard</p>
+          <button onClick={() => navigate("/add-samples")}>
+            📸 Add Face Samples
+          </button>
 
-                <div
-                    style={{
-                        marginTop: "1.5rem",
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "1rem",
-                    }}
-                >
-                    <button className="auth-button" onClick={handleViewAttendance}>
-                        📊 View Attendance
-                    </button>
-
-                    <button className="auth-button" onClick={handleAttendanceDashboard}>
-                        📅 Attendance Dashboard
-                    </button>
-
-                    <button className="auth-button" onClick={handleOpenScanner}>
-                        🎥 Open Scanner
-                    </button>
-
-                    <button className="auth-button" onClick={handleAddSamples}>
-                        📸 Add Face Samples
-                    </button>
-
-                    <button className="auth-button" onClick={handleLogout}>
-                        🚪 Logout
-                    </button>
-                </div>
-            </div>
+          <button className="logout" onClick={handleLogout}>
+            🚪 Logout
+          </button>
         </div>
-    );
+      </div>
+    </div>
+  );
 }
 
 export default Dashboard;
