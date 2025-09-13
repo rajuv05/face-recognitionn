@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import "./Dashboard.css"; // new file (separate from Auth.css)
+import { CalendarDays, BarChart3, Camera, UserPlus, LogOut } from "lucide-react";
+import "./Dashboard.css";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -11,31 +12,29 @@ function Dashboard() {
     navigate("/");
   };
 
+  const ActionButton = ({ onClick, icon: Icon, title }) => (
+    <button className="action-btn" onClick={onClick}>
+      <Icon className="action-icon" />
+      <span>{title}</span>
+    </button>
+  );
+
   return (
-    <div className="dashboard-container">
+    <div className="dashboard-root">
       <div className="dashboard-card">
-        <h2>👋 Welcome, {username}!</h2>
+        <h2 className="welcome-text">👋 Welcome Admin</h2>
         <p className="subtitle">Face Recognition Attendance System</p>
 
-        <div className="button-grid">
-          <button onClick={() => navigate("/attendance-list")}>
-            📊 View Attendance
-          </button>
+        <div className="actions-grid">
+          <ActionButton onClick={() => navigate("/attendance-list")} icon={BarChart3} title="View Attendance" />
+          <ActionButton onClick={() => navigate("/attendance-dashboard")} icon={CalendarDays} title="Dashboard" />
+          <ActionButton onClick={() => navigate("/scanner")} icon={Camera} title="Open Scanner" />
+          <ActionButton onClick={() => navigate("/add-samples")} icon={UserPlus} title="Add Face Samples" />
+        </div>
 
-          <button onClick={() => navigate("/attendance-dashboard")}>
-            📅 Attendance Dashboard
-          </button>
-
-          <button onClick={() => navigate("/scanner")}>
-            🎥 Open Scanner
-          </button>
-
-          <button onClick={() => navigate("/add-samples")}>
-            📸 Add Face Samples
-          </button>
-
-          <button className="logout" onClick={handleLogout}>
-            🚪 Logout
+        <div className="logout-container">
+          <button className="logout-btn" onClick={handleLogout}>
+            <LogOut className="logout-icon" /> Logout
           </button>
         </div>
       </div>

@@ -39,18 +39,19 @@ public class FaceRecognitionController {
     private final String labelsPath;
     private final String trainingPath;
     private final String haarPath;
+    private final String facesBasePath;
 
     public FaceRecognitionController(AttendanceRepository attendanceRepository) {
         this.attendanceRepository = attendanceRepository;
 
-        // ✅ Always resolve under backend/faces (not backend/backend/faces)
+        // ✅ Always resolve under backend/faces
         String basePath = System.getProperty("user.dir");
-        String facesPath = Paths.get(basePath, "faces").toString();
+        this.facesBasePath = Paths.get(basePath, "faces").toString();
 
-        this.trainingPath = Paths.get(facesPath, "training").toString();
-        this.modelPath = Paths.get(facesPath, "trainer.yml").toString();
-        this.labelsPath = Paths.get(facesPath, "labels.txt").toString();
-        this.haarPath = Paths.get(facesPath, "haarcascade_frontalface_default.xml").toString();
+        this.trainingPath = Paths.get(facesBasePath, "training").toString();
+        this.modelPath = Paths.get(facesBasePath, "trainer.yml").toString();
+        this.labelsPath = Paths.get(facesBasePath, "labels.txt").toString();
+        this.haarPath = Paths.get(facesBasePath, "haarcascade_frontalface_default.xml").toString();
 
         // ✅ Ensure directories exist
         new File(this.trainingPath).mkdirs();
@@ -99,7 +100,7 @@ public class FaceRecognitionController {
         }
     }
 
-    // ✅ Save new face sample into backend/faces/training
+    // ✅ Save new face sample into faces/training and retrain
     @PostMapping("/save-sample")
     public ResponseEntity<String> saveSample(@RequestParam("file") MultipartFile file) {
         try {
@@ -109,17 +110,22 @@ public class FaceRecognitionController {
             File dest = new File(dir, file.getOriginalFilename());
             file.transferTo(dest);
 
-            return ResponseEntity.ok("✅ Saved: " + file.getOriginalFilename());
+            // 🔹 Train directly using utility method
+            FaceTrainer.train(facesBasePath);
+            reloadModel();
+
+            return ResponseEntity.ok("✅ Saved & Trained: " + file.getOriginalFilename());
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(500).body("❌ Error: " + e.getMessage());
         }
     }
 
-    // ✅ Train & reload
+    // ✅ Train & reload (manual trigger)
     @PostMapping("/train")
     public ResponseEntity<String> trainModel() {
         try {
-            FaceTrainer.main(new String[] {});
+            FaceTrainer.train(facesBasePath);
             reloadModel();
             return ResponseEntity.ok("✅ Training completed and model reloaded");
         } catch (Exception e) {
@@ -155,7 +161,6 @@ public class FaceRecognitionController {
             for (int i = 0; i < facesDetected.size(); i++) {
                 Rect rect = facesDetected.get(i);
                 Mat faceROI = new Mat(imageGray, rect);
-
                 opencv_imgproc.resize(faceROI, faceROI, new org.bytedeco.opencv.opencv_core.Size(200, 200));
 
                 int[] predictedLabel = new int[1];

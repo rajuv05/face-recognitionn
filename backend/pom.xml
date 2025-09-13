@@ -38,11 +38,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-thymeleaf</artifactId>
-        </dependency>
-
         <!-- Mail -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -77,12 +72,14 @@
         </dependency>
 
         <!-- Dev Tools (for hot reload) -->
+        <!-- Dev Tools (for hot reload in development only) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
-            <scope>runtime</scope>
+            <scope>compile</scope>
             <optional>true</optional>
         </dependency>
+
 
         <!-- Test -->
         <dependency>

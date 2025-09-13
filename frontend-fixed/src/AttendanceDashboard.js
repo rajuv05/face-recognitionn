@@ -124,10 +124,6 @@ const AttendanceDashboard = () => {
             className="search-input"
           />
 
-          <button className="btn clear-all-btn" onClick={clearAllAttendance}>
-            🗑️ Clear All Attendance
-          </button>
-
           <ul className="student-list">
             {students
               .filter(
@@ -148,6 +144,13 @@ const AttendanceDashboard = () => {
                 </li>
               ))}
           </ul>
+
+          {/* 🔹 Button moved to bottom */}
+          <div className="sidebar-bottom">
+            <button className="btn clear-all-btn" onClick={clearAllAttendance}>
+              🗑️ Clear All Attendance
+            </button>
+          </div>
         </div>
 
         {/* Main Content */}
