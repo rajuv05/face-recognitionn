@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import Webcam from "react-webcam";
 import axios from "axios";
 import "./RealTimeScanner.css";
@@ -9,19 +9,26 @@ export default function RealTimeScanner() {
   const [message, setMessage] = useState("Waiting for scan...");
   const [faces, setFaces] = useState([]);
   const [glowType, setGlowType] = useState(""); // "", "success", "fail"
+  const [isScanning, setIsScanning] = useState(true);
 
-  function dataURLtoBlob(dataURL) {
-    const byteString = atob(dataURL.split(",")[1]);
-    const mimeString = dataURL.split(",")[0].split(":")[1].split(";")[0];
-    const ab = new ArrayBuffer(byteString.length);
-    const ia = new Uint8Array(ab);
-    for (let i = 0; i < byteString.length; i++) {
-      ia[i] = byteString.charCodeAt(i);
-    }
-    return new Blob([ab], { type: mimeString });
-  }
+  /** Convert a webcam screenshot (dataURL) to Blob */
+  const dataURLtoBlob = (dataURL) => {
+    const [meta, base64] = dataURL.split(",");
+    const mime = meta.match(/:(.*?);/)[1];
+    const bytes = atob(base64);
+    const arr = new Uint8Array(bytes.length);
+    for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+    return new Blob([arr], { type: mime });
+  };
 
-  const captureAndSend = async () => {
+  /** Glow animation helper */
+  const triggerGlow = (type) => {
+    setGlowType(type);
+    setTimeout(() => setGlowType(""), 2000);
+  };
+
+  /** Send frame to backend */
+  const captureAndSend = useCallback(async () => {
     if (!webcamRef.current) return;
     const imageSrc = webcamRef.current.getScreenshot();
     if (!imageSrc) return;
@@ -31,66 +38,77 @@ export default function RealTimeScanner() {
     formData.append("file", blob, "frame.jpg");
 
     try {
-      const res = await axios.post(
+      const { data } = await axios.post(
         "http://localhost:8080/api/face/recognize",
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
-      const msg = res.data.message || "❌ No response";
+      const msg = data.message || "❌ No response";
       setMessage(msg);
-      setFaces(res.data.faces || []);
+      setFaces(data.faces || []);
 
-      // ✅ Success case
       if (msg.toLowerCase().includes("marked") || msg.includes("✅")) {
-        setGlowType("success");
-        setTimeout(() => setGlowType(""), 2000);
-      }
-      // ❌ Failure case
-      else if (
+        triggerGlow("success");
+      } else if (
         msg.toLowerCase().includes("no recog") ||
         msg.toLowerCase().includes("unknown") ||
         msg.includes("❌")
       ) {
-        setGlowType("fail");
-        setTimeout(() => setGlowType(""), 2000);
+        triggerGlow("fail");
       }
     } catch (err) {
-      console.error("🚨 Error calling backend:", err);
+      console.error("🚨 Backend error:", err);
       setMessage("⚠️ Error connecting to backend");
-      setGlowType("fail");
-      setTimeout(() => setGlowType(""), 2000);
+      triggerGlow("fail");
     }
-  };
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      captureAndSend();
-    }, 3000);
-    return () => clearInterval(interval);
   }, []);
 
+  /** Smooth scanning loop using requestAnimationFrame */
+  useEffect(() => {
+    let timer;
+    const scan = () => {
+      captureAndSend();
+      timer = setTimeout(() => requestAnimationFrame(scan), 3000); // every 3s
+    };
+    if (isScanning) scan();
+    return () => clearTimeout(timer);
+  }, [captureAndSend, isScanning]);
+
+  /** Draw detection boxes */
   useEffect(() => {
     const canvas = canvasRef.current;
-    const context = canvas?.getContext("2d");
-    if (!canvas || !context) return;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
 
-    context.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     faces.forEach((face) => {
-      context.beginPath();
-      context.lineWidth = "3";
-      context.strokeStyle = face.identity !== "Unknown" ? "lime" : "red";
-      context.rect(face.x, face.y, face.width, face.height);
-      context.stroke();
+      const pad = 4; // tighten box slightly
+      ctx.beginPath();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = face.identity !== "Unknown" ? "lime" : "red";
+      ctx.rect(
+        face.x + pad,
+        face.y + pad,
+        face.width - pad * 2,
+        face.height - pad * 2
+      );
+      ctx.stroke();
 
-      context.fillStyle = "yellow";
-      context.font = "16px Poppins, sans-serif";
-      const label =
-        face.identity && face.identity !== "Unknown"
-          ? `${face.identity} (${face.confidence?.toFixed?.(1) ?? "?"})`
-          : "Unknown";
-      context.fillText(label, face.x, face.y - 5);
+      // Gradient label background
+      const gradient = ctx.createLinearGradient(0, 0, 120, 0);
+      gradient.addColorStop(0, "#ffffff");
+      gradient.addColorStop(1, "#001f54");
+      ctx.fillStyle = gradient;
+      ctx.font = "16px Poppins, sans-serif";
+      ctx.fillText(
+        face.identity !== "Unknown"
+          ? `${face.identity} (${Number(face.confidence ?? face.distance ?? 0).toFixed(1)})`
+          : "Unknown",
+        face.x + pad,
+        face.y - 6
+      );
     });
   }, [faces]);
 
@@ -99,8 +117,6 @@ export default function RealTimeScanner() {
       <div className="scanner-card">
         <h2>👁️ Real-Time Face Scanner</h2>
         <p className="subtitle">Scan faces and recognize students instantly</p>
-
-        {/* ✅ Always visible message */}
         <p className="scan-message">{message}</p>
 
         <div
@@ -129,14 +145,15 @@ export default function RealTimeScanner() {
               <div key={idx} className="face-card">
                 <strong>
                   Face #{idx + 1}: {face.identity}{" "}
-                  {face.confidence && `(${face.confidence.toFixed(1)})`}
+                  {face.confidence &&
+                    `(${Number(face.confidence).toFixed(1)})`}
                 </strong>
-                {face.alternatives && face.alternatives.length > 0 && (
+                {face.alternatives?.length > 0 && (
                   <ul>
                     {face.alternatives.map((alt, i) => (
                       <li key={i}>
                         {i + 1}. {alt.name} (Roll: {alt.rollNo}, conf:{" "}
-                        {alt.confidence.toFixed(1)})
+                        {Number(alt.confidence).toFixed(1)})
                       </li>
                     ))}
                   </ul>
@@ -145,6 +162,13 @@ export default function RealTimeScanner() {
             ))}
           </div>
         )}
+
+        <button
+          className="toggle-scan-btn"
+          onClick={() => setIsScanning((s) => !s)}
+        >
+          {isScanning ? "⏸ Pause Scanning" : "▶️ Resume Scanning"}
+        </button>
       </div>
     </div>
   );

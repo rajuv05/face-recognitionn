@@ -1,0 +1,34 @@
+# Maven target folder
+/target/
+
+# Logs
+*.log
+
+# Environment files
+*.env
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# VS Code
+.vscode/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Java compiled files
+*.class
+
+# Backup files
+*.swp
+*~
+
+# Docker
+*.pid

@@ -5,7 +5,6 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.*;
 import org.bytedeco.opencv.opencv_face.LBPHFaceRecognizer;
-import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -16,23 +15,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class FaceTrainer {
 
-    // 🔹 Main is only for testing manually
     public static void main(String[] args) throws IOException {
-        String baseDir = System.getProperty("user.dir") + "/faces"; // ✅ no backend/backend duplication
+        String baseDir = System.getProperty("user.dir") + "/backend/faces";
         train(baseDir);
     }
 
-    // 🔹 Reusable method for controller
     public static void train(String baseDir) throws IOException {
         String facesDir = baseDir + "/training";
         String modelPath = baseDir + "/trainer.yml";
         String labelPath = baseDir + "/labels.txt";
-        String haarPath = baseDir + "/haarcascade_frontalface_default.xml";
-
-        CascadeClassifier faceDetector = new CascadeClassifier(haarPath);
-        if (faceDetector.empty()) {
-            throw new IOException("❌ Haar Cascade not found at: " + haarPath);
-        }
 
         File dir = new File(facesDir);
         File[] files = dir.listFiles((d, name) ->
@@ -49,27 +40,21 @@ public class FaceTrainer {
         AtomicInteger nextLabelId = new AtomicInteger(0);
 
         for (File file : files) {
-            Mat imgColor = opencv_imgcodecs.imread(file.getAbsolutePath());
-            if (imgColor == null || imgColor.empty()) {
+            // 🔹 Read grayscale directly
+            Mat imgGray = opencv_imgcodecs.imread(file.getAbsolutePath(), opencv_imgcodecs.IMREAD_GRAYSCALE);
+
+            if (imgGray == null || imgGray.empty()) {
                 System.out.println("⚠ Skipping invalid: " + file.getName());
                 continue;
             }
 
-            Mat imgGray = new Mat();
-            opencv_imgproc.cvtColor(imgColor, imgGray, opencv_imgproc.COLOR_BGR2GRAY);
+            // 🔹 Normalize (equalize histogram → better lighting invariance)
+            opencv_imgproc.equalizeHist(imgGray, imgGray);
 
-            RectVector faces = new RectVector();
-            faceDetector.detectMultiScale(imgGray, faces);
+            // 🔹 Resize all faces to fixed size
+            opencv_imgproc.resize(imgGray, imgGray, new Size(200, 200));
 
-            if (faces.size() == 0) {
-                System.out.println("⚠ No face found in: " + file.getName());
-                continue;
-            }
-
-            Rect rect = faces.get(0);
-            Mat faceROI = new Mat(imgGray, rect);
-            opencv_imgproc.resize(faceROI, faceROI, new Size(200, 200));
-
+            // 🔹 Parse filename → RollNo_Name_Count.jpg
             String filename = file.getName().split("\\.")[0];
             String[] parts = filename.split("_", 3);
             if (parts.length < 2) {
@@ -81,7 +66,7 @@ public class FaceTrainer {
             String name = parts[1];
             int assignedLabel = rollToLabel.computeIfAbsent(rollNo, k -> nextLabelId.getAndIncrement());
 
-            images.add(faceROI);
+            images.add(imgGray);
             labels.add(assignedLabel);
             rollToName.putIfAbsent(rollNo, name);
         }
@@ -99,7 +84,8 @@ public class FaceTrainer {
         IntBuffer buf = labelsMat.createBuffer();
         for (int l : labels) buf.put(l);
 
-        LBPHFaceRecognizer recognizer = LBPHFaceRecognizer.create();
+        // 🔹 Improved LBPH parameters
+        LBPHFaceRecognizer recognizer = LBPHFaceRecognizer.create(2, 2, 8, 8, 100);
         recognizer.train(imagesVector, labelsMat);
         recognizer.save(modelPath);
 

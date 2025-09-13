@@ -12,9 +12,7 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Rect;
-import org.bytedeco.opencv.opencv_core.RectVector;
+import org.bytedeco.opencv.opencv_core.*;
 import org.bytedeco.opencv.opencv_face.LBPHFaceRecognizer;
 import org.bytedeco.opencv.opencv_objdetect.CascadeClassifier;
 
@@ -33,7 +31,9 @@ public class FaceRecognitionController {
     private final AttendanceRepository attendanceRepository;
     private CascadeClassifier faceDetector;
 
-    private static final double CONFIDENCE_THRESHOLD = 50.0;
+    // thresholds
+    private static final double CONFIDENCE_THRESHOLD = 20.0; // accept good matches
+    private static final double MAX_DISTANCE = 120.0;        // reject false positives
 
     private final String modelPath;
     private final String labelsPath;
@@ -44,7 +44,6 @@ public class FaceRecognitionController {
     public FaceRecognitionController(AttendanceRepository attendanceRepository) {
         this.attendanceRepository = attendanceRepository;
 
-        // ✅ Always resolve under backend/faces
         String basePath = System.getProperty("user.dir");
         this.facesBasePath = Paths.get(basePath, "faces").toString();
 
@@ -53,17 +52,14 @@ public class FaceRecognitionController {
         this.labelsPath = Paths.get(facesBasePath, "labels.txt").toString();
         this.haarPath = Paths.get(facesBasePath, "haarcascade_frontalface_default.xml").toString();
 
-        // ✅ Ensure directories exist
         new File(this.trainingPath).mkdirs();
 
-        // ✅ Initialize recognizer
         recognizer = LBPHFaceRecognizer.create();
         if (new File(modelPath).exists()) {
             recognizer.read(modelPath);
             loadLabels(labelsPath);
         }
 
-        // ✅ Load Haar Cascade
         faceDetector = new CascadeClassifier(haarPath);
         if (faceDetector.empty()) {
             System.err.println("❌ Haar Cascade not loaded at: " + haarPath);
@@ -100,7 +96,6 @@ public class FaceRecognitionController {
         }
     }
 
-    // ✅ Save new face sample into faces/training and retrain
     @PostMapping("/save-sample")
     public ResponseEntity<String> saveSample(@RequestParam("file") MultipartFile file) {
         try {
@@ -110,7 +105,6 @@ public class FaceRecognitionController {
             File dest = new File(dir, file.getOriginalFilename());
             file.transferTo(dest);
 
-            // 🔹 Train directly using utility method
             FaceTrainer.train(facesBasePath);
             reloadModel();
 
@@ -121,7 +115,6 @@ public class FaceRecognitionController {
         }
     }
 
-    // ✅ Train & reload (manual trigger)
     @PostMapping("/train")
     public ResponseEntity<String> trainModel() {
         try {
@@ -134,7 +127,7 @@ public class FaceRecognitionController {
         }
     }
 
-    // ✅ Recognize faces
+    // ✅ Recognition endpoint with filtering
     @PostMapping("/recognize")
     public ResponseEntity<Map<String, Object>> recognizeFace(@RequestParam("file") MultipartFile file) {
         Map<String, Object> response = new HashMap<>();
@@ -150,7 +143,15 @@ public class FaceRecognitionController {
             }
 
             RectVector facesDetected = new RectVector();
-            faceDetector.detectMultiScale(imageGray, facesDetected);
+            faceDetector.detectMultiScale(
+                    imageGray,
+                    facesDetected,
+                    1.05,   // tighter scale step
+                    7,      // higher minNeighbors (reduce background noise)
+                    0,
+                    new Size(80, 80),
+                    new Size()
+            );
 
             if (facesDetected.empty()) {
                 response.put("message", "❌ No face detected");
@@ -158,32 +159,36 @@ public class FaceRecognitionController {
                 return ResponseEntity.ok(response);
             }
 
+            Set<String> processedRolls = new HashSet<>(); // prevent duplicate marking
+
             for (int i = 0; i < facesDetected.size(); i++) {
                 Rect rect = facesDetected.get(i);
                 Mat faceROI = new Mat(imageGray, rect);
-                opencv_imgproc.resize(faceROI, faceROI, new org.bytedeco.opencv.opencv_core.Size(200, 200));
+                opencv_imgproc.resize(faceROI, faceROI, new Size(200, 200));
 
                 int[] predictedLabel = new int[1];
                 double[] predictedDistance = new double[1];
                 recognizer.predict(faceROI, predictedLabel, predictedDistance);
 
-                String identity = "Unknown";
                 double distance = predictedDistance[0];
-                StudentInfo matchedInfo = null;
+                String identity = "Unknown";
+                StudentInfo matchedInfo = labelsMap.get(predictedLabel[0]);
 
-                if (predictedLabel[0] != -1 && labelsMap.containsKey(predictedLabel[0])) {
-                    matchedInfo = labelsMap.get(predictedLabel[0]);
-                }
-
-                if (matchedInfo != null) {
-                    if (distance <= CONFIDENCE_THRESHOLD) {
+                if (matchedInfo != null && distance <= CONFIDENCE_THRESHOLD) {
+                    // prevent duplicate attendance in one frame
+                    if (!processedRolls.contains(matchedInfo.getRollNo())) {
                         markAttendance(matchedInfo, distance, msg);
-                        identity = matchedInfo.getName();
-                    } else {
-                        msg.append("❌ Low confidence for face (Roll No: ")
-                                .append(matchedInfo.getRollNo())
-                                .append(", distance: ").append(distance).append(")\n");
+                        processedRolls.add(matchedInfo.getRollNo());
                     }
+                    identity = matchedInfo.getName();
+                } else if (distance > MAX_DISTANCE) {
+                    msg.append("❌ False detection ignored [distance=")
+                            .append(distance).append("]\n");
+                } else if (matchedInfo != null) {
+                    msg.append("❌ Low confidence for ")
+                            .append(matchedInfo.getName())
+                            .append(" (Roll No: ").append(matchedInfo.getRollNo())
+                            .append(", distance: ").append(distance).append(")\n");
                 } else {
                     msg.append("❌ Face not recognized\n");
                 }
@@ -220,7 +225,6 @@ public class FaceRecognitionController {
     private void markAttendance(StudentInfo info, double distance, StringBuilder msg) {
         LocalDate today = LocalDate.now();
         LocalDateTime now = LocalDateTime.now();
-
         boolean alreadyMarked = !attendanceRepository.findByRollNoAndDate(info.getRollNo(), today).isEmpty();
 
         if (!alreadyMarked) {
@@ -241,18 +245,13 @@ public class FaceRecognitionController {
     static class StudentInfo {
         private final String name;
         private final String rollNo;
-
         public StudentInfo(String name, String rollNo) {
             this.name = name;
             this.rollNo = rollNo;
         }
-
         public String getName() { return name; }
         public String getRollNo() { return rollNo; }
-
         @Override
-        public String toString() {
-            return name + " (Roll: " + rollNo + ")";
-        }
+        public String toString() { return name + " (Roll: " + rollNo + ")"; }
     }
 }

@@ -3,6 +3,7 @@ package com.example.attendancesystem.model;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "users") // avoid reserved word "user"
 public class User {
 
     @Id
