@@ -1,0 +1,112 @@
+/* Root Layout */
+.dashboard-root {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #0f172a;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Neon Glow Background (reuse Signup neon-bg if exists) */
+.neon-bg {
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  background: radial-gradient(circle at 20% 20%, rgba(0, 247, 255, 0.25), transparent 60%),
+              radial-gradient(circle at 80% 80%, rgba(255, 0, 110, 0.25), transparent 60%);
+  filter: blur(120px);
+  z-index: 0;
+}
+
+/* Dashboard Card */
+.dashboard-card {
+  z-index: 1;
+  background: rgba(17, 25, 40, 0.75);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 2rem;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 600px;
+  text-align: center;
+  box-shadow: 0 0 25px rgba(0, 247, 255, 0.3);
+}
+
+/* Titles */
+.welcome-text {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: rgba(200, 200, 200, 0.8);
+  margin-bottom: 2rem;
+}
+
+/* Action Buttons Grid */
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.action-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 1rem;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+  border-color: rgba(0, 247, 255, 0.8);
+  box-shadow: 0 0 20px rgba(0, 247, 255, 0.5);
+}
+
+.action-icon {
+  width: 28px;
+  height: 28px;
+}
+
+/* Logout */
+.logout-container {
+  margin-top: 1rem;
+}
+
+.logout-btn {
+  background: rgba(255, 0, 110, 0.1);
+  border: 1px solid rgba(255, 0, 110, 0.3);
+  color: #ff006e;
+  padding: 0.9rem 1.5rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 0, 110, 0.2);
+  box-shadow: 0 0 18px rgba(255, 0, 110, 0.5);
+}
+
+.logout-icon {
+  width: 20px;
+  height: 20px;
+}

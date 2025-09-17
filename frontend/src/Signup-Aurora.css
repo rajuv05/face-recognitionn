@@ -1,0 +1,227 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600&display=swap');
+
+:root {
+  --glow-1: #00f2fe;
+  --glow-2: #c465f7;
+  --glow-3: #f75d9e;
+  --text-primary: #f0f0f0;
+  --text-secondary: #b0b0b0;
+  --bg-card: rgba(15, 15, 25, 0.6);
+  --error-color: #ff8a8a;
+}
+
+.aether-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  font-family: 'Manrope', sans-serif;
+  color: var(--text-primary);
+  background: #030205;
+}
+
+/* The Aurora Layer */
+.aurora-background {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(125deg,
+    var(--glow-1),
+    var(--glow-2) 40%,
+    var(--glow-3) 70%,
+    var(--glow-1));
+  background-size: 400% 400%;
+  animation: aurora-shift 20s ease infinite;
+  filter: blur(80px); /* This is key for the soft aurora look */
+  opacity: 0.4;
+  z-index: 1;
+}
+
+@keyframes aurora-shift {
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+
+#tsparticles { z-index: 2; }
+
+/* The Morphing Card */
+.aether-card {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 420px;
+  background: var(--bg-card);
+  backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  padding: 2.5rem;
+}
+
+/* The rotating, glowing border */
+.aether-card::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit; /* follows the parent's animated border-radius */
+  background: conic-gradient(from 180deg at 50% 50%,
+    var(--glow-1), var(--glow-2), var(--glow-3), var(--glow-1));
+  animation: border-spin 6s linear infinite;
+  filter: blur(5px);
+  z-index: -1;
+}
+
+@keyframes border-spin {
+  to { transform: rotate(360deg); }
+}
+
+.card-content {
+  text-align: center;
+}
+
+.card-header svg {
+  color: var(--glow-1);
+  animation: subtle-float 4s ease-in-out infinite;
+}
+
+@keyframes subtle-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0.5rem 0;
+  text-shadow: 0 0 10px var(--glow-2);
+}
+
+.card-header p {
+  color: var(--text-secondary);
+  margin: 0 0 2rem 0;
+  font-weight: 300;
+}
+
+/* Shimmering Inputs */
+.input-group {
+  position: relative;
+  margin-bottom: 2.2rem;
+}
+
+.input-group input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
+  font-size: 1rem;
+  padding: 10px 0;
+  outline: none;
+  position: relative;
+}
+
+.input-group label {
+  position: absolute;
+  left: 0;
+  top: 10px;
+  color: var(--text-secondary);
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+/* The animated underline */
+.input-group input::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 0;
+  width: 0%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--glow-1), var(--glow-2));
+  transition: width 0.3s ease;
+}
+
+.input-group input:focus::after { width: 100%; }
+
+.input-group input:focus + label,
+.input-group input:valid + label {
+  top: -14px;
+  font-size: 0.8rem;
+  color: var(--glow-2);
+}
+
+.error-message {
+  color: var(--error-color);
+  font-size: 0.8rem;
+  position: absolute;
+  left: 0;
+  bottom: -20px;
+}
+
+.error-banner {
+    padding: 0.75rem;
+    border: 1px solid var(--error-color);
+    background: rgba(255, 138, 138, 0.1);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+
+/* The Button */
+.aether-button {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid var(--glow-1);
+  border-radius: 8px;
+  background: rgba(0, 242, 254, 0.1);
+  color: var(--glow-1);
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+}
+
+.aether-button:hover:not(:disabled) {
+  background: var(--glow-1);
+  color: #030205;
+  box-shadow: 0 0 20px var(--glow-1);
+}
+
+.aether-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.breathing-loader {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--glow-1);
+  box-shadow: 0 0 10px var(--glow-1);
+  animation: breathe 1.5s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(0.8); opacity: 0.5; }
+  50% { transform: scale(1.2); opacity: 1; }
+}
+
+
+.auth-link {
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.auth-link a {
+  color: var(--glow-1);
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.auth-link a:hover {
+  color: #fff;
+  text-shadow: 0 0 8px var(--glow-1);
+}

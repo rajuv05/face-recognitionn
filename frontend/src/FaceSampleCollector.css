@@ -1,0 +1,140 @@
+/* Neon Background */
+.neon-bg {
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  background: radial-gradient(circle at 20% 20%, rgba(0, 247, 255, 0.25), transparent 60%),
+              radial-gradient(circle at 80% 80%, rgba(255, 0, 110, 0.25), transparent 60%);
+  filter: blur(120px);
+  z-index: 0;
+}
+
+/* Root */
+.collector-root {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0f172a, #1e293b, #111827);
+  font-family: "Inter", sans-serif;
+  color: white;
+}
+
+/* Card */
+.collector-card {
+  position: relative;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  padding: 2rem;
+  border-radius: 20px;
+  width: 550px;
+  max-width: 95%;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+}
+
+.welcome-text {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.subtitle {
+  opacity: 0.7;
+  margin-bottom: 1.5rem;
+}
+
+/* Inputs */
+.input-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 1rem;
+  justify-content: center;
+}
+
+.input-wrapper {
+  position: relative;
+  flex: 1;
+}
+
+.input-icon {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  opacity: 0.7;
+}
+
+input, .camera-select {
+  padding: 10px 10px 10px 36px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  width: 100%;
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+
+.camera-label {
+  font-size: 0.9rem;
+  margin-right: 8px;
+  align-self: center;
+}
+
+/* Webcam */
+.webcam-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+/* Buttons */
+.button-row {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #06b6d4, #3b82f6);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* Previews */
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  margin-top: 1rem;
+}
+
+.preview-item {
+  text-align: center;
+}
+
+.preview-item img {
+  width: 100%;
+  border-radius: 10px;
+}

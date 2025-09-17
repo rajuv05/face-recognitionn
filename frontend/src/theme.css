@@ -1,0 +1,73 @@
+/* Global font & background */
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(to bottom, #0a0f1c, #0d1117, #0d0d0d);
+  color: #fff;
+}
+
+/* Card Style */
+.card {
+  background: rgba(20, 20, 30, 0.92);
+  border-radius: 20px;
+  padding: 1.8rem;
+  box-shadow: 0 0 25px rgba(0, 123, 255, 0.3);
+  border: 1px solid rgba(0, 123, 255, 0.2);
+  animation: fadeIn 0.6s ease forwards;
+}
+
+/* Headings */
+h1, h2, h3, h4 {
+  color: #1e90ff;
+  text-shadow: 0 0 12px rgba(30, 144, 255, 0.6);
+  margin-bottom: 0.6rem;
+}
+
+/* Buttons */
+.btn {
+  padding: 12px 20px;
+  background: linear-gradient(90deg, #1e90ff, #0066cc);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 12px rgba(30, 144, 255, 0.5);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px rgba(30, 144, 255, 0.8);
+}
+
+.btn:disabled {
+  background: #333;
+  color: #777;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Inputs */
+input, select {
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: #101520;
+  color: white;
+  font-size: 1rem;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+input:focus, select:focus {
+  outline: none;
+  background: #1a1f2e;
+  box-shadow: 0 0 8px #1e90ff;
+}
+
+/* Fade Animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

@@ -1,0 +1,17 @@
+# Maven target output
+target/
+
+# Logs
+*.log
+
+# IDE & editor configs
+.idea/
+.vscode/
+*.iml
+
+# OS/system files
+.DS_Store
+
+# Docker-related
+Dockerfile
+docker-compose.yml

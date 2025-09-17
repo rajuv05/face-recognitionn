@@ -1,0 +1,162 @@
+/* Auth.css */
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0a0f1f, #0a0a1a, #0c0018);
+  font-family: "Inter", sans-serif;
+  color: white;
+}
+
+.auth-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  padding: 2.5rem;
+  border-radius: 1rem;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  box-shadow: 0 0 40px rgba(0, 200, 255, 0.2);
+}
+
+.auth-card h2 {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #00e6ff;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+}
+
+.auth-input {
+  width: 100%;
+  padding: 0.9rem;
+  margin: 0.6rem 0;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.3);
+  color: white;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.auth-input::placeholder {
+  color: #888;
+}
+
+.auth-input:focus {
+  outline: none;
+  border-color: #00e6ff;
+  box-shadow: 0 0 10px rgba(0, 230, 255, 0.6);
+}
+
+.auth-button {
+  width: 100%;
+  padding: 1rem;
+  margin-top: 1rem;
+  border: none;
+  border-radius: 0.6rem;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  color: white;
+  background: linear-gradient(90deg, #00e6ff, #ff00ff);
+  box-shadow: 0 0 20px rgba(0, 230, 255, 0.5);
+  transition: all 0.3s ease;
+}
+
+.auth-button:hover {
+  opacity: 0.9;
+  box-shadow: 0 0 30px rgba(0, 230, 255, 0.7);
+}
+
+.login-message {
+  margin-top: 1rem;
+  padding: 0.7rem;
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+.login-message.success {
+  background: rgba(0, 255, 128, 0.15);
+  border: 1px solid rgba(0, 255, 128, 0.5);
+  color: #00ff88;
+}
+
+.login-message.error {
+  background: rgba(255, 0, 64, 0.15);
+  border: 1px solid rgba(255, 0, 64, 0.5);
+  color: #ff4060;
+}
+
+.auth-link {
+  margin-top: 1.5rem;
+  font-size: 0.9rem;
+  color: #aaa;
+}
+
+.auth-link a {
+  color: #00e6ff;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.auth-link a:hover {
+  text-decoration: underline;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* Dropdown (Select) Styling */
+select {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  margin-top: 1rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08); /* Glass effect */
+  color: white;
+  font-size: 1rem;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 0 10px rgba(0, 230, 255, 0.25);
+}
+
+select:hover {
+  border-color: #00e6ff;
+  box-shadow: 0 0 15px rgba(0, 230, 255, 0.4);
+}
+
+select:focus {
+  border-color: #00e6ff;
+  box-shadow: 0 0 20px rgba(0, 230, 255, 0.6);
+}
+
+/* Dropdown options */
+select option {
+  background-color: #0a0f1f; /* Match dark neon theme */
+  color: #ffffff;
+  font-weight: 500;
+  padding: 0.6rem;
+}
+
+select option:checked {
+  background-color: #00e6ff; /* Highlight selected */
+  color: #0a0f1f;
+}
+

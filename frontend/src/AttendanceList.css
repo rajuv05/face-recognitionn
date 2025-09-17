@@ -1,0 +1,56 @@
+/* Page container */
+.attendance-container {
+  min-height: 100vh;
+  padding: 2rem;
+  background: linear-gradient(to bottom, #0a0f1c, #0d1117, #0d0d0d);
+  color: #fff;
+}
+
+/* Gradient Title */
+.attendance-title {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 2rem;
+}
+
+.gradient-text {
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: bold;
+}
+
+/* Attendance Table */
+.attendance-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(20, 20, 30, 0.95);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.25);
+}
+
+.attendance-table th,
+.attendance-table td {
+  padding: 12px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.attendance-table th {
+  background: #111827;
+  color: #60a5fa;
+  font-weight: bold;
+}
+
+.attendance-table tr:hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.no-records {
+  text-align: center;
+  padding: 1rem;
+  color: #9ca3af;
+  font-style: italic;
+}

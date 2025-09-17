@@ -1,0 +1,388 @@
+/* ================== Base Container ================== */
+.dashboard-container {
+  height: 100vh;
+  background: radial-gradient(circle at top, #0a0f1c, #05080f);
+  color: #fff;
+  font-family: "Segoe UI", sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px;
+  overflow: hidden;
+}
+
+/* Neon Gradient Title */
+.dashboard-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  background: linear-gradient(90deg, #00f5ff, #00c6ff, #0072ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+  animation: glow-text 3s infinite alternate;
+}
+
+/* Neon Text Glow Animation */
+@keyframes glow-text {
+  from {
+    text-shadow: 0 0 5px #00f5ff, 0 0 10px #00c6ff, 0 0 15px #0072ff;
+  }
+  to {
+    text-shadow: 0 0 10px #00f5ff, 0 0 20px #00c6ff, 0 0 30px #0072ff;
+  }
+}
+
+/* Dashboard Layout */
+.dashboard-layout {
+  display: flex;
+  width: 100%;
+  max-width: 1200px;
+  height: 80vh;
+  background: linear-gradient(145deg, #0d1220, #090d18);
+  border-radius: 20px;
+  box-shadow: 0 0 25px rgba(0, 200, 255, 0.25), 0 0 50px rgba(0, 150, 255, 0.15);
+  overflow: hidden;
+  border: 1px solid rgba(0, 200, 255, 0.2);
+}
+
+
+/* ================== Sidebar ================== */
+.sidebar {
+  width: 280px;
+  background: #0a152b;
+  border-right: 1px solid rgba(0, 180, 255, 0.25);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.sidebar-bottom {
+  margin-top: auto;
+}
+
+.search-input {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #00b4ff;
+  background: #0d223f;
+  color: #e0f2fe;
+  font-size: 14px;
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 8px rgba(0, 180, 255, 0.4);
+}
+
+.student-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.student-item {
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 10px;
+  background: #0a1c36;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #e0f2fe;
+}
+
+.student-item:hover {
+  background: #132b4f;
+  box-shadow: 0 0 12px rgba(0, 180, 255, 0.35);
+}
+
+.student-item.active {
+  background: #0072ff;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 0 15px rgba(0, 180, 255, 0.55);
+}
+
+/* ================== Main Content ================== */
+.main-content {
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto;
+}
+
+.student-heading {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  background: linear-gradient(90deg, #00c6ff, #0072ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ================== Stats Section ================== */
+.main-flex {
+  display: flex;
+  gap: 30px;
+}
+
+.stats-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  flex: 1;
+}
+
+.stat-card {
+  padding: 25px;
+  border-radius: 16px;
+  text-align: center;
+  font-size: 14px;
+  background: #0d223f;
+  color: #e0f2fe;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 15px rgba(0, 180, 255, 0.15);
+}
+
+.stat-card h3 {
+  font-size: 1.8rem;
+  margin-bottom: 5px;
+}
+
+.stat-card.present {
+  border: 1px solid #22c55e;
+  box-shadow: 0 0 15px rgba(34, 197, 94, 0.25);
+}
+
+.stat-card.absent {
+  border: 1px solid #ef4444;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.25);
+}
+
+.stat-card.holiday {
+  border: 1px solid #facc15;
+  box-shadow: 0 0 15px rgba(250, 204, 21, 0.25);
+}
+
+.stat-card.percentage {
+  border: 1px solid #00b4ff;
+  box-shadow: 0 0 15px rgba(0, 180, 255, 0.35);
+}
+
+/* ================== Calendar ================== */
+.calendar-container {
+  flex: 1;
+  background: #0a152b;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 0 15px rgba(0, 180, 255, 0.2);
+}
+
+.custom-calendar {
+  background: transparent;
+  border: none;
+  color: #fff;
+}
+
+.custom-calendar .react-calendar__tile {
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.custom-calendar .present {
+  background: rgba(34, 197, 94, 0.2);
+  border: 1px solid #22c55e;
+}
+
+.custom-calendar .absent {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid #ef4444;
+}
+
+.custom-calendar .holiday {
+  background: rgba(250, 204, 21, 0.2);
+  border: 1px solid #facc15;
+}
+
+.custom-calendar .future {
+  color: #64748b;
+}
+
+/* ================== Buttons ================== */
+.btn {
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.clear-btn {
+  background: linear-gradient(90deg, #ff0844, #ff3c80);
+  color: #fff;
+  margin-top: 20px;
+  box-shadow: 0 0 15px rgba(255, 56, 96, 0.3);
+}
+
+.clear-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px rgba(255, 56, 96, 0.6);
+}
+
+.clear-all-btn {
+  background: linear-gradient(90deg, #ff0844, #ff3c80);
+  color: #fff;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 0 15px rgba(255, 56, 96, 0.3);
+}
+
+.clear-all-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px rgba(255, 56, 96, 0.6);
+}
+
+/* ================== Placeholder ================== */
+.placeholder {
+  font-size: 1.2rem;
+  color: #9ca3af;
+  text-align: center;
+  margin-top: 50px;
+}
+
+/* ================== Tablet ================== */
+@media (max-width: 1024px) {
+  .dashboard-layout {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid rgba(0, 180, 255, 0.25);
+  }
+
+  .main-content {
+    padding: 20px;
+  }
+
+  .main-flex {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .calendar-container {
+    width: 100%;
+  }
+
+  .stats-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+}
+
+/* ================== Mobile ================== */
+@media (max-width: 600px) {
+  .dashboard-container {
+    padding: 15px;
+    height: auto;
+    overflow-y: auto;
+  }
+
+  .dashboard-title {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+  }
+
+  .dashboard-layout {
+    flex-direction: column;
+    height: auto;
+    border-radius: 12px;
+  }
+
+  .sidebar {
+    padding: 12px;
+    gap: 10px;
+    max-height: 40vh;
+    overflow-y: auto;
+  }
+
+  .student-list {
+    max-height: 25vh;
+    overflow-y: auto;
+  }
+
+  .student-item {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+
+  .main-content {
+    padding: 15px;
+  }
+
+  .student-heading {
+    font-size: 1.2rem;
+  }
+
+  .main-flex {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .stats-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .stat-card {
+    padding: 15px;
+    font-size: 12px;
+  }
+
+  .stat-card h3 {
+    font-size: 1.2rem;
+  }
+
+  .calendar-container {
+    padding: 12px;
+    font-size: 12px;
+  }
+
+  .custom-calendar .react-calendar__tile {
+    padding: 6px;
+    font-size: 12px;
+  }
+
+  .lecture-summary h3 {
+    font-size: 1rem;
+  }
+
+  .attendance-table th,
+  .attendance-table td {
+    font-size: 12px;
+    padding: 6px;
+  }
+
+  .btn {
+    font-size: 12px;
+    padding: 8px 12px;
+    border-radius: 8px;
+  }
+
+  .clear-btn,
+  .clear-all-btn {
+    width: 100%;
+  }
+}

@@ -1,0 +1,69 @@
+# =========================
+# Global ignores
+# =========================
+*.log
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db
+
+# =========================
+# Node / Frontend
+# =========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+.pnpm-debug.log*
+frontend/.next/
+frontend/out/
+frontend/build/
+
+# Ignore ML models in frontend
+frontend/public/models/
+
+# =========================
+# Java / Backend
+# =========================
+target/
+build/
+*.class
+*.jar
+*.war
+*.ear
+
+# IDE configs
+*.iml
+.idea/
+.vscode/
+
+# Spring Boot static builds
+backend/src/main/resources/static/
+
+# Keep only essentials in static
+!backend/src/main/resources/static/index.html
+!backend/src/main/resources/static/favicon.ico
+
+# Ignore ML models in backend
+backend/src/main/resources/static/models/
+backend/src/main/resources/models/
+backend/target/classes/models/
+
+# =========================
+# Test outputs / junk
+# =========================
+backend/test_output/
+test-output/
+tmp/
+
+# =========================
+# Python (if used for scripts)
+# =========================
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.env
+.env
